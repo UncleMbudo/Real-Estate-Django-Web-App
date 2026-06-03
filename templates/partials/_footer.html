@@ -1,5 +1,12 @@
- <!-- Footer -->
-  <footer id="main-footer" class="py-4 bg-primary text-white text-center">
-    Copyright &copy;
-    <span class="year"></span>  Real Estate
-  </footer>
+<footer id="main-footer" class="py-4 bg-primary text-white text-center">
+  <div class="container">
+    <p class="mb-0">
+      &copy; <span class="year"></span> SA Properties &mdash; All rights reserved.
+    </p>
+    <small>
+      <a href="{% url 'index' %}" class="text-white">Home</a> &middot;
+      <a href="{% url 'about' %}" class="text-white">About</a> &middot;
+      <a href="{% url 'listings' %}" class="text-white">Listings</a>
+    </small>
+  </div>
+</footer>

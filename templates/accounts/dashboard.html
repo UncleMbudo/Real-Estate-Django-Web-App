@@ -1,69 +1,107 @@
 {% extends 'base.html' %}
-
-{% block title %} | User Dashboard {% endblock %}
+{% load humanize %}
+{% block title %} | Dashboard{% endblock %}
 
 {% block content %}
 <section id="showcase-inner" class="py-5 text-white">
-    <div class="container">
-      <div class="row text-center">
-        <div class="col-md-12">
-          <h1 class="display-4">User Dashboard</h1>
-          <p class="lead">Manage your  Real Estate account</p>
-        </div>
+  <div class="container">
+    <div class="row text-center">
+      <div class="col-md-12">
+        <h1 class="display-4">My Dashboard</h1>
+        <p class="lead">Welcome back, {{ user.first_name|default:user.username }}!</p>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Breadcrumb -->
-  <section id="bc" class="mt-3">
-    <div class="container">
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item">
-            <a href="{% url 'index' %}">
-              <i class="fas fa-home"></i> Home</a>
-          </li>
-          <li class="breadcrumb-item active"> Dashboard</li>
-        </ol>
-      </nav>
-    </div>
-  </section>
+<section id="bc" class="mt-3">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'index' %}"><i class="fas fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item active">Dashboard</li>
+      </ol>
+    </nav>
+  </div>
+</section>
 
-  <!-- Alerts -->
-  {% include 'partials/_alerts.html' %}
+{% include 'partials/_alerts.html' %}
 
-  <section id="dashboard" class="py-4">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12">
-          <h2>Welcome {{ user.first_name }}</h2>
-          {% if contacts %}
-            <p>Here are the property listings that you have inquired about</p>
-            <table class="table">
-              <thead>
+<section id="dashboard" class="py-4">
+  <div class="container">
+
+    <!-- Favourites -->
+    <div class="row mb-5">
+      <div class="col-md-12">
+        <h3><i class="fas fa-heart text-danger"></i> Saved Properties</h3>
+        {% if favourites %}
+          <table class="table table-hover">
+            <thead class="thead-light">
+              <tr>
+                <th>#</th>
+                <th>Property</th>
+                <th>Price</th>
+                <th>Location</th>
+                <th>Saved</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for fav in favourites %}
                 <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Property</th>
-                  <th></th>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ fav.listing.title }}</td>
+                  <td>R{{ fav.listing.price | intcomma }}</td>
+                  <td>{{ fav.listing.city }}, {{ fav.listing.state }}</td>
+                  <td>{{ fav.created_at | timesince }} ago</td>
+                  <td>
+                    <a href="{% url 'listing' fav.listing.id %}" class="btn btn-sm btn-primary">View</a>
+                    <form action="{% url 'toggle_favourite' fav.listing.id %}" method="POST" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                    </form>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {% for contact in contacts %}
-                  <tr>
-                    <td>{{ contact.id }}</td>
-                    <td>{{ contact.listing }}</td>
-                    <td>
-                      <a class="btn btn-light" href="{% url 'listing' contact.listing_id %}">View Listing</a>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          {% else %}
-            <p>You have not made any inquiries</p>
-          {% endif %}
-        </div>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="text-muted">You have no saved properties yet. <a href="{% url 'listings' %}">Browse listings</a> and click the heart icon to save them here.</p>
+        {% endif %}
       </div>
     </div>
-  </section>
-  {% endblock %}
+
+    <!-- Enquiries -->
+    <div class="row">
+      <div class="col-md-12">
+        <h3><i class="fas fa-envelope text-primary"></i> My Enquiries</h3>
+        {% if contacts %}
+          <table class="table table-hover">
+            <thead class="thead-light">
+              <tr>
+                <th>#</th>
+                <th>Property</th>
+                <th>Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for contact in contacts %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ contact.listing }}</td>
+                  <td>{{ contact.contact_date | date:"d M Y" }}</td>
+                  <td><a class="btn btn-sm btn-light" href="{% url 'listing' contact.listing_id %}">View Listing</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="text-muted">You have not submitted any enquiries yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
